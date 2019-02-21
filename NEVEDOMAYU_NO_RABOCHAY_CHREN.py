@@ -31,7 +31,9 @@ class Score():
         self.score = self.fontObj.render('Score:' + str(self.cou), 1, (255, 255, 255))
 
 s = Score()        
-        
+
+      
+
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__(all_sprites)
@@ -187,15 +189,27 @@ class Player(pygame.sprite.Sprite): # Нужно разобрать
         if pygame.sprite.groupcollide(playerSprite, laserSprites_e, 0, 1):
             explosionSprites.add(PlayerExplosion(player.rect.center))
             self.hp -= 1
+            hpl.update()
         if self.lasermax - 5 > 0 and s.cou % 20 == 0 and s.cou != 0 and s.cou != self.k:
             self.lasermax -= 5
             self.k = s.cou
             self.lasertimer = 0
             LelUPSprites.add(LelUP(self.rect.center))
   
+class hphki():
+    def __init__(self):
+        self.fontObj = pygame.font.Font('freesansbold.ttf', 50)    
+        self.hp = 10
+        self.points = self.fontObj.render('Health Points:' + str(self.hp), 1, (255, 255, 255))
+        self.rect = self.points.get_rect()
+        self.rect.center = (850, 10)
+    def update(self):
+        self.hp -= 1
+        self.points = self.fontObj.render('Health Points:' + str(self.hp), 1, (255, 255, 255))
 
+hpl = hphki()  
 
-           
+        
 class Laser(pygame.sprite.Sprite):
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self)
@@ -219,8 +233,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.centerx = centerx
         self.rect.centery = centery
         self.pok = centerx
-        self.dx = 1
-        self.dy = 1
+        self.dx = 2
+        self.dy = 2
         self.cou = 0
         self.max1 = 10
     def update(self):
@@ -249,6 +263,7 @@ class Enemy(pygame.sprite.Sprite):
             explosionSprites.add(PlayerExplosion(player.rect.center))
             s.update()
             player.hp -= 1
+            hpl.update()
             self.kill()
     def reset(self):
         self.rect.bottom = 0
@@ -292,6 +307,7 @@ class Enemy2(pygame.sprite.Sprite):
             explosionSprites.add(AnimatedSprite(self.rect.center))
             explosionSprites.add(PlayerExplosion(player.rect.center))
             s.update()
+            hpl.update()
             player.hp -= 1
             self.kill()
             
@@ -373,6 +389,7 @@ class Boss(pygame.sprite.Sprite):
             explosionSprites.add(PlayerExplosion(player.rect.center))
             s.update()
             player.hp -= 1
+            hpl.update()
             self.live()
         if self.hp <= 0 and self.f2 == False:
             self.kon = self.p + 80
@@ -557,6 +574,7 @@ while f:
     enemySprites.draw(screen)
     LelUPSprites.draw(screen)
     enemy2Sprites.draw(screen)
+    screen.blit(hpl.points, hpl.rect.center)
     screen.blit(s.score, s.rect.center)
     enemyExplosion.draw(screen)
     explosionSprites.draw(screen)
@@ -604,12 +622,13 @@ def winscreen():
         intro_rect.x = 540
         text_coord += intro_rect.x
         screen2.blit(string_rendered, intro_rect)
-if op == 1:
-    lastscreen()
-elif op == 2:
-    winscreen()
+
 while True:
+    if op == 1:
+        lastscreen()
+    elif op == 2:
+        winscreen()    
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.QUIT: 
+            pygame.quit()
     pygame.display.flip()
-    
