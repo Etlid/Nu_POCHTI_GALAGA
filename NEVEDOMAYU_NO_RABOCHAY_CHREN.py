@@ -9,10 +9,6 @@ import os
 pygame.init()
 all_sprites = pygame.sprite.Group()
 
-def terminate():
-    pygame.quit()
-
-# exit the program
 def events():
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -21,6 +17,7 @@ def events():
 
 class Score():
     def __init__(self):
+        super().__init__()        
         self.fontObj = pygame.font.Font('freesansbold.ttf', 50)    
         self.cou =  0
         self.score = self.fontObj.render('Score:' + str(self.cou), 1, (255, 255, 255))
@@ -92,14 +89,32 @@ class LelUP(pygame.sprite.Sprite):
         self.rect.centerx = pos[0]
         self.rect.centery = -60 + pos[1]
         self.counter = 0
-        self.maxcount = 10    
+        self.maxcount = 100    
     def update(self):
         self.counter += 1
+        key = pygame.key.get_pressed()
+
+        # Movement
+        if key[K_UP]:
+            self.rect.centery += -6
+        if key[K_DOWN]:
+            self.rect.centery += 6
+        if key[K_RIGHT]:
+            self.rect.centerx += 6
+        if key[K_LEFT]:
+            self.rect.centerx += -6
+
+        # Restrictions
+        self.rect.bottom = min(self.rect.bottom, 730)
+        self.rect.top = max(self.rect.top, 50)
+        self.rect.right = min(self.rect.right, 1268)
+        self.rect.left = max(self.rect.left, 12)        
         if self.counter > self.maxcount:
             self.kill()
 class Fire(pygame.sprite.Sprite): # Нужно разобрать
 
     def __init__(self):
+        super().__init__(all_sprites)
 
         pygame.sprite.Sprite.__init__(self)
         
@@ -115,13 +130,13 @@ class Fire(pygame.sprite.Sprite): # Нужно разобрать
 
         # Movement
         if key[K_UP]:
-            self.rect.centery += -3
+            self.rect.centery += -6
         if key[K_DOWN]:
-            self.rect.centery += 3
+            self.rect.centery += 6
         if key[K_RIGHT]:
-            self.rect.centerx += 3
+            self.rect.centerx += 6
         if key[K_LEFT]:
-            self.rect.centerx += -3
+            self.rect.centerx += -6
 
         # Restrictions
         self.rect.bottom = min(self.rect.bottom, 730)
@@ -131,11 +146,12 @@ class Fire(pygame.sprite.Sprite): # Нужно разобрать
 
 class Player(pygame.sprite.Sprite): # Нужно разобрать
 
-    def __init__(self, all_sprites):
+    def __init__(self):
+        super().__init__(all_sprites)
 
-        pygame.sprite.Sprite.__init__(self)
+        #pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.image.load('data/gg2.png', '-1')
+        self.image = pygame.image.load('data/s.png', '-1')
         self.image = pygame.transform.scale(self.image, (45, 75))
         self.rect = self.image.convert().get_rect()
         self.x_dist = 2
@@ -144,40 +160,52 @@ class Player(pygame.sprite.Sprite): # Нужно разобрать
         self.lasermax = 50
         self.rect.centery = 360
         self.rect.centerx = 640
-        self.hp = 10
-        self.all_sprites = all_sprites
+        self.hp = 15
+        #self.all_sprites = all_sprites
         self.k = 0
     def update(self):
         key = pygame.key.get_pressed()
 
         # Movement
         if key[K_UP]:
-            self.rect.centery += -3
+            self.rect.centery += -6
         if key[K_DOWN]:
-            self.rect.centery += 3
+            self.rect.centery += 6
         if key[K_RIGHT]:
-            self.rect.centerx += 3
+            self.rect.centerx += 6
         if key[K_LEFT]:
-            self.rect.centerx += -3
+            self.rect.centerx += -6
         # Lasers
 
         if s.cou < 50:
             self.lasertimer = self.lasertimer + 1
             if self.lasertimer == self.lasermax:
-                laserSprites.add(Laser(self.rect.midtop))
+                x = Laser(self.rect.midtop)
+                all_sprites.add(x)
+                laserSprites.add(x)
                 self.lasertimer = 0
         elif s.cou >= 50 and s.cou < 100:
             self.lasertimer = self.lasertimer + 1
             if self.lasertimer == self.lasermax:
-                laserSprites.add(Laser((self.rect.left, self.rect.top + 10)))
-                laserSprites.add(Laser((self.rect.right, self.rect.top + 15)))
+                x1 = Laser((self.rect.left, self.rect.top + 10))
+                y1 = Laser((self.rect.right, self.rect.top + 15))
+                all_sprites.add(x1)
+                all_sprites.add(y1)
+                laserSprites.add(x1)
+                laserSprites.add(y1)
                 self.lasertimer = 0
         elif s.cou >= 100:
             self.lasertimer = self.lasertimer + 1
             if self.lasertimer == self.lasermax:
-                laserSprites.add(Laser(self.rect.midtop))                    
-                laserSprites.add(Laser((self.rect.left, self.rect.top + 10)))
-                laserSprites.add(Laser((self.rect.right, self.rect.top + 15)))                
+                x2 = Laser(self.rect.midtop)
+                y2 = Laser((self.rect.left, self.rect.top + 10))
+                z2 = Laser((self.rect.right, self.rect.top + 15))
+                all_sprites.add(x2)                    
+                all_sprites.add(y2)
+                all_sprites.add(z2)  
+                laserSprites.add(x2)
+                laserSprites.add(y2)
+                laserSprites.add(z2)                
                 self.lasertimer = 0                
 
         # Restrictions
@@ -187,19 +215,26 @@ class Player(pygame.sprite.Sprite): # Нужно разобрать
         self.rect.left = max(self.rect.left, 0)
         
         if pygame.sprite.groupcollide(playerSprite, laserSprites_e, 0, 1):
-            explosionSprites.add(PlayerExplosion(player.rect.center))
+            all_sprites.add(PlayerExplosion(player.rect.center))
             self.hp -= 1
             hpl.update()
+        if pygame.sprite.groupcollide(playerSprite, BossLasp, 0, 1):
+            all_sprites.add(PlayerExplosion(player.rect.center))
+            self.hp -= 1
+            hpl.update()
+      
         if self.lasermax - 5 > 0 and s.cou % 20 == 0 and s.cou != 0 and s.cou != self.k:
             self.lasermax -= 5
             self.k = s.cou
             self.lasertimer = 0
-            LelUPSprites.add(LelUP(self.rect.center))
+            all_sprites.add(LelUP(self.rect.center))
   
 class hphki():
     def __init__(self):
+        super().__init__()
+        
         self.fontObj = pygame.font.Font('freesansbold.ttf', 50)    
-        self.hp = 10
+        self.hp = 15
         self.points = self.fontObj.render('Health Points:' + str(self.hp), 1, (255, 255, 255))
         self.rect = self.points.get_rect()
         self.rect.center = (850, 10)
@@ -212,6 +247,8 @@ hpl = hphki()
         
 class Laser(pygame.sprite.Sprite):
     def __init__(self, pos):
+        super().__init__(all_sprites)
+        pygame.sprite.Sprite.__init__(self)
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("data/laser1.png")
         self.image = pygame.transform.scale(self.image, (10, 30))        
@@ -226,7 +263,9 @@ class Laser(pygame.sprite.Sprite):
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, centerx, centery):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__(all_sprites)
+        
+
         self.image = pygame.image.load("data/alien.png")
         self.image = pygame.transform.scale(self.image, (30, 60))        
         self.rect = self.image.convert().get_rect()
@@ -253,14 +292,17 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.centerx += self.dx
         # Laser Collisions
         if pygame.sprite.spritecollideany(self, laserSprites):
-            explosionSprites.add(AnimatedSprite(self.rect.center))
+            all_sprites.remove(self) 
+            
+            all_sprites.add(AnimatedSprite(self.rect.center))
+
             s.update()
-            self.kill()
 
         # Ship Collisions
         if pygame.sprite.spritecollideany(self, playerSprite ):
-            explosionSprites.add(AnimatedSprite(self.rect.center))
-            explosionSprites.add(PlayerExplosion(player.rect.center))
+            all_sprites.add(AnimatedSprite(self.rect.center))
+            all_sprites.add(PlayerExplosion(player.rect.center))
+ 
             s.update()
             player.hp -= 1
             hpl.update()
@@ -273,6 +315,8 @@ class Enemy(pygame.sprite.Sprite):
 
 class Enemy2(pygame.sprite.Sprite):
     def __init__(self, centerx):
+        super().__init__()
+        
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("data/alien2.png")
         self.image = pygame.transform.scale(self.image, (30, 60))        
@@ -298,14 +342,16 @@ class Enemy2(pygame.sprite.Sprite):
             
         # Laser Collisions    
         if pygame.sprite.spritecollideany(self, laserSprites):
-            explosionSprites.add(AnimatedSprite(self.rect.center))
+            print(2)
+            enemy2Sprites.remove(self)
+            all_sprites.add(AnimatedSprite(self.rect.center))
             s.update()
-            self.kill()
+
 
         # Ship Collisions
         if pygame.sprite.spritecollideany(self, playerSprite ):
-            explosionSprites.add(AnimatedSprite(self.rect.center))
-            explosionSprites.add(PlayerExplosion(player.rect.center))
+            all_sprites.add(AnimatedSprite(self.rect.center))
+            all_sprites.add(PlayerExplosion(player.rect.center))
             s.update()
             hpl.update()
             player.hp -= 1
@@ -313,6 +359,8 @@ class Enemy2(pygame.sprite.Sprite):
             
 class EnemyLaser(pygame.sprite.Sprite):
     def __init__(self, pos):
+        super().__init__(all_sprites)
+        
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("data/e_laser.png")
         self.image = pygame.transform.scale(self.image, (10, 30))        
@@ -354,7 +402,9 @@ class PlayerExplosion(pygame.sprite.Sprite):
                 self.counter = 0
 class Boss(pygame.sprite.Sprite):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
+        
+        #pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("data/boss.png")
         self.image = pygame.transform.scale(self.image, (1280, 300))        
         self.rect = self.image.convert().get_rect()
@@ -372,21 +422,27 @@ class Boss(pygame.sprite.Sprite):
         self.lasertimer += 1
 
         if self.lasertimer == self.lasermax:
-            laserSprites_e.add(BossLaser((self.rect.midtop[0], self.rect.midtop[1]+20)))
-            laserSprites_e.add(BossLaser1((self.rect.left, self.rect.top/2)))
-            laserSprites_e.add(BossLaser2((self.rect.right, self.rect.top/2)))            
+            x4 = BossLaser((self.rect.midtop[0], self.rect.midtop[1]+20))
+            y4 = BossLaser1((self.rect.left, self.rect.top/2))
+            z4 = BossLaser2((self.rect.right, self.rect.top/2))
+            all_sprites.add(x4)
+            all_sprites.add(y4)
+            all_sprites.add(z4)
+            BossLasp.add(x4)
+            BossLasp.add(y4)
+            BossLasp.add(z4)
             self.lasertimer = 0        
     
         # Laser Collisions    
         if pygame.sprite.groupcollide(BossSprite, laserSprites, 0, 1):
-            explosionSprites.add(AnimatedSprite(self.rect.center))
+            all_sprites.add(AnimatedSprite(self.rect.center))
             s.update()
             self.live()
 
         # Ship Collisions
         if pygame.sprite.spritecollideany(self, playerSprite ):
-            explosionSprites.add(AnimatedSprite(self.rect.center))
-            explosionSprites.add(PlayerExplosion(player.rect.center))
+            all_sprites.add(AnimatedSprite(self.rect.center))
+            all_sprites.add(PlayerExplosion(player.rect.center))
             s.update()
             player.hp -= 1
             hpl.update()
@@ -394,19 +450,21 @@ class Boss(pygame.sprite.Sprite):
         if self.hp <= 0 and self.f2 == False:
             self.kon = self.p + 80
             self.f2 = True
-            BossBlustsprite.add(BossBlust((640, 100)))
-            BossBlustsprite.add(BossBlust((400, 50)))
-            BossBlustsprite.add(BossBlust((800, 50)))
-            BossBlustsprite.add(BossBlust((100, 20)))
-            BossBlustsprite.add(BossBlust((1000, 20)))
+            all_sprites.add(BossBlust((640, 100)))
+            all_sprites.add(BossBlust((400, 50)))
+            all_sprites.add(BossBlust((800, 50)))
+            all_sprites.add(BossBlust((100, 20)))
+            all_sprites.add(BossBlust((1000, 20)))
         if self.p == self.kon and self.f2:
-            self.kill()
+            BossSprite.remove(self)
             self.f2 = False
     def live(self):
         self.hp -= 1
 class BossLaser(pygame.sprite.Sprite):
     def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__(all_sprites)
+        
+        #pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("data/b_l.png")
         self.image = pygame.transform.scale(self.image, (10, 30))        
         self.rect = self.image.convert().get_rect()
@@ -419,7 +477,9 @@ class BossLaser(pygame.sprite.Sprite):
             self.rect.move_ip(self.na, 5)
 class BossLaser1(pygame.sprite.Sprite):
     def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self)    
+        super().__init__(all_sprites)
+        
+        #pygame.sprite.Sprite.__init__(self)    
         self.image = pygame.image.load("data/b_l.png")
         self.image = pygame.transform.scale(self.image, (10, 30))        
         self.rect = self.image.convert().get_rect()
@@ -432,7 +492,9 @@ class BossLaser1(pygame.sprite.Sprite):
             self.rect.move_ip(self.na, 5)
 class BossLaser2(pygame.sprite.Sprite):
     def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self)    
+        super().__init__(all_sprites)
+        
+        #pygame.sprite.Sprite.__init__(self)    
         self.image = pygame.image.load("data/b_l.png")
         self.image = pygame.transform.scale(self.image, (10, 30))        
         self.rect = self.image.convert().get_rect()
@@ -443,6 +505,8 @@ class BossLaser2(pygame.sprite.Sprite):
             self.kill()
         else:
             self.rect.move_ip(self.na, 5)
+
+
 # define display surface			
 W, H = 1280, 720
 HW, HH = W / 2, H / 2
@@ -455,8 +519,8 @@ screen = pygame.display.set_mode((1280, 720))
 
 CLOCK = pygame.time.Clock()
 DS = pygame.display.set_mode((W, H))
-pygame.display.set_caption("code.Pylet -Seamless Background Scrolling")
-FPS = 240
+pygame.display.set_caption("The Best Game In The World")
+FPS = 120
 
 
 bkgd = pygame.image.load("Data/f.png").convert()
@@ -466,13 +530,12 @@ y = 0
 BLACK = (0, 0, 0, 255)
 WHITE = (255, 255, 255, 255)
 
-player = Player(all_sprites)
+player = Player()
 fire = Fire()
-global explosionSprites
-explosionSprites = pygame.sprite.RenderPlain(())
+
 global playerSprite   
 playerSprite = pygame.sprite.RenderPlain((player))
-FireSprites = pygame.sprite.RenderPlain((fire))
+
 global laserSprites
 laserSprites = pygame.sprite.RenderPlain(())
 global laserSprites_e
@@ -480,23 +543,15 @@ laserSprites_e = pygame.sprite.RenderPlain(())
 global BossSprite
 BossSprite = pygame.sprite.RenderPlain(())
 
-global BossBlustsprite
-BossBlustsprite = pygame.sprite.RenderPlain(())
-
-global LelUPSprites
-LelUPSprites = pygame.sprite.RenderPlain(())
-
-global enemySprites
-enemySprites = pygame.sprite.RenderPlain(())
 global enemy2Sprites
 enemy2Sprites = pygame.sprite.RenderPlain(())
 
-global enemyExplosion
-enemyExplosion = pygame.sprite.RenderPlain(())
 
-global playerExplosion
-playerExplosion = pygame.sprite.RenderPlain(())
-cou = 0
+
+
+global BossLasp
+BossLasp = pygame.sprite.RenderPlain(())
+
 # main loop
 def start_screen():
     intro_text = ["Space Battle"]
@@ -533,65 +588,64 @@ cu = 0
 op = 2
 while f:
     events()
-    
-    rel_y = y % bkgd.get_rect().height
+    rel_y = y % bkgd.get_rect().height 
     DS.blit(bkgd, (0, rel_y - bkgd.get_rect().height) )
     if rel_y < H:
-        DS.blit(bkgd, (0, rel_y))
+        DS.blit(bkgd, (0, rel_y))    
+    
     y += 1
     cu += 1
 
-    if cu == 14400:
+    if cu == 3600:
         fb = False
         b = Boss()
+        
         BossSprite.add(b)
 
     elif cu > 2400 and cu % 120 == 0 and fb:
-        enemy2Sprites.add(Enemy2(random.randrange(0, 1280)))   
+        y1 = Enemy2(random.randrange(0, 1280))
+        enemy2Sprites.add(y1)
+
     elif cu % 60 == 0 and fb:
-        enemySprites.add(Enemy(random.randrange(0, 1280), 0))
-    if cu > 14400:
+        x = Enemy(random.randrange(0, 1280), 0)
+        all_sprites.add(x)
+    if cu > 3600:
         if b.hp <= 0 and b.f2 == False:
+            print(4)
             f = False
-    fire.update()
-    laserSprites.update()
-    laserSprites_e.update()    
-    enemySprites.update()
+    
+    #fire.update()
+    #player.update()
+    BossSprite.update()
+    #laserSprites.update()
     enemy2Sprites.update()
-    LelUPSprites.update()
-    BossSprite.update() 
-    BossBlustsprite.update()
-    enemyExplosion.update()
-    explosionSprites.update()
-    playerExplosion.update()
-    player.update()
+    
+    all_sprites.update()
+    all_sprites.draw(screen)
+    
     BossSprite.draw(screen)
-    playerSprite.draw(screen)
-    BossBlustsprite.draw(screen)
-    FireSprites.draw(screen)
-    laserSprites.draw(screen)
-    laserSprites_e.draw(screen)    
-    enemySprites.draw(screen)
-    LelUPSprites.draw(screen)
     enemy2Sprites.draw(screen)
+    
     screen.blit(hpl.points, hpl.rect.center)
     screen.blit(s.score, s.rect.center)
-    enemyExplosion.draw(screen)
-    explosionSprites.draw(screen)
-    playerExplosion.draw(screen)
+
     
-    #pygame.draw.line(DS, (0, 0, 0), (0, rel_y), (H*2, rel_y), 3)
     pygame.display.update()
     pygame.display.flip()    
-    #CLOCK.tick(FPS)
+    CLOCK.tick(FPS)
     
     if player.hp <= 0:
         sco = s.cou
         f = False
         op = 1
+    rel_y = y % bkgd.get_rect().height 
+    DS.blit(bkgd, (0, rel_y - bkgd.get_rect().height) )
+    if rel_y < H:
+        DS.blit(bkgd, (0, rel_y))
 pygame.init()
-screen2 = pygame.display.set_mode((1280, 720))
+
 def lastscreen():
+    screen2 = pygame.display.set_mode((1280, 720))
     intro_text = ["You have killed " + str(s.cou) + " alien capitalists! Well played!!!"]
 
     fon = pygame.transform.scale(pygame.image.load('data/ls.png'), (1280, 720))
@@ -606,8 +660,15 @@ def lastscreen():
         intro_rect.x = 200
         text_coord += intro_rect.x
         screen2.blit(string_rendered, intro_rect)
-        
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        pygame.display.flip()
+        CLOCK.tick(FPS)
 def winscreen():
+    screen2 = pygame.display.set_mode((1280, 720))
     intro_text = ["ВЫ прошли эту игру!)"]
 
     fon = pygame.transform.scale(pygame.image.load('data/win.png'), (1280, 720))
@@ -622,13 +683,16 @@ def winscreen():
         intro_rect.x = 540
         text_coord += intro_rect.x
         screen2.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            
+        pygame.display.flip()
+        CLOCK.tick(FPS)
 
-while True:
-    if op == 1:
-        lastscreen()
-    elif op == 2:
-        winscreen()    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: 
-            pygame.quit()
-    pygame.display.flip()
+if op == 1:
+    lastscreen()
+elif op == 2:
+    winscreen()    
+    
