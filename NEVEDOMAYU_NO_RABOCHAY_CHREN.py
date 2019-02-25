@@ -123,7 +123,7 @@ class Fire(pygame.sprite.Sprite): # Нужно разобрать
         self.rect = self.image.convert().get_rect()
         self.x_dist = 5
         self.y_dist = 5
-        self.rect.centery = 392
+        self.rect.centery = 410
         self.rect.centerx = 640
     def update(self):
         key = pygame.key.get_pressed()
@@ -139,8 +139,8 @@ class Fire(pygame.sprite.Sprite): # Нужно разобрать
             self.rect.centerx += -6
 
         # Restrictions
-        self.rect.bottom = min(self.rect.bottom, 730)
-        self.rect.top = max(self.rect.top, 50)
+        self.rect.bottom = min(self.rect.bottom, 750)
+        self.rect.top = max(self.rect.top, 70)
         self.rect.right = min(self.rect.right, 1268)
         self.rect.left = max(self.rect.left, 12)
 
@@ -151,7 +151,7 @@ class Player(pygame.sprite.Sprite): # Нужно разобрать
 
         #pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.image.load('data/s.png', '-1')
+        self.image = pygame.image.load('data/gg3.png', '-1')
         self.image = pygame.transform.scale(self.image, (45, 75))
         self.rect = self.image.convert().get_rect()
         self.x_dist = 2
@@ -520,7 +520,7 @@ screen = pygame.display.set_mode((1280, 720))
 CLOCK = pygame.time.Clock()
 DS = pygame.display.set_mode((W, H))
 pygame.display.set_caption("The Best Game In The World")
-FPS = 120
+FPS = 240
 
 
 bkgd = pygame.image.load("Data/f.png").convert()
@@ -596,7 +596,7 @@ while f:
     y += 1
     cu += 1
 
-    if cu == 3600:
+    if cu == 7200:
         fb = False
         b = Boss()
         
@@ -609,15 +609,11 @@ while f:
     elif cu % 60 == 0 and fb:
         x = Enemy(random.randrange(0, 1280), 0)
         all_sprites.add(x)
-    if cu > 3600:
+    if cu > 7200:
         if b.hp <= 0 and b.f2 == False:
             print(4)
             f = False
-    
-    #fire.update()
-    #player.update()
     BossSprite.update()
-    #laserSprites.update()
     enemy2Sprites.update()
     
     all_sprites.update()
@@ -695,4 +691,3 @@ if op == 1:
     lastscreen()
 elif op == 2:
     winscreen()    
-    
